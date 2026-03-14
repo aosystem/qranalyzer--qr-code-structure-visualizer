@@ -6,6 +6,9 @@
 [![App Store](https://img.shields.io/badge/App_Store-Download-black?logo=apple&logoColor=white)](https://apps.apple.com/jp/app/id6758965675)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+## 📺 Demo Video
+[![Watch the video](https://img.youtube.com/vi/O_xu2zd9btk/0.jpg)](https://www.youtube.com/watch?v=O_xu2zd9btk)
+
 ## 🌟 Key Features
 - **Deep Structural Analysis:** Color-codes Finder Patterns, Timing Patterns, Format Information, and Version Information for clear identification.
 - **ECC & Data Visualization:** Distinguishes between Data modules and Error Correction Code (ECC) modules.
