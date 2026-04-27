@@ -76,6 +76,7 @@ class QrProcessor {
         final int raw2 = _readFormatLocation2(matrix);
         final formatInfo = FormatInformation.decodeFormatInformation(raw1, raw2);
         if (formatInfo == null) {
+          //print("Warning: BCH error correction failed. Falling back to raw bit read.");
         }
         String ecLevel;
         int maskPattern;
@@ -139,8 +140,9 @@ class QrProcessor {
     _markAlignmentPatterns(map, version);
     _markDarkModule(map, version);
 
-    int totalBits = (dataCW + eccCW) * 8;
-    int dataBits = dataCW * 8;
+    final int totalBits = (dataCW + eccCW) * 8;
+    final int dataBits = dataCW * 8;
+
     int bitIndex = 0;
     int col = size - 1;
     bool upward = true;
@@ -154,6 +156,8 @@ class QrProcessor {
             if (bitIndex < totalBits) {
               map[row][c] = (bitIndex < dataBits) ? QrRegion.data : QrRegion.ecc;
               bitIndex++;
+            } else {
+              map[row][c] = QrRegion.unused;
             }
           }
         }
@@ -295,13 +299,17 @@ class QrProcessor {
   void _markFinderPatterns(List<List<QrRegion>> map) {
     final size = map.length;
     void mark(int ox, int oy) {
-      for (int y = oy; y < oy + 7; y++) {
-        for (int x = ox; x < ox + 7; x++) { map[y][x] = QrRegion.finder; }
+      for (int y = oy; y < oy + 8; y++) {
+        for (int x = ox; x < ox + 8; x++) {
+          if (x >= 0 && x < size && y >= 0 && y < size) {
+            map[y][x] = QrRegion.finder;
+          }
+        }
       }
     }
     mark(0, 0);
-    mark(size - 7, 0);
-    mark(0, size - 7);
+    mark(size - 8, 0);
+    mark(0, size - 8);
   }
 
   void _markTimingPatterns(List<List<QrRegion>> map) {
@@ -314,13 +322,13 @@ class QrProcessor {
 
   void _markFormatInfo(List<List<QrRegion>> map) {
     final size = map.length;
-    for (int i = 0; i <= 5; i++) {
-      map[8][i] = QrRegion.format;
+    for (int i = 0; i <= 8; i++) {
+      if (i != 6) map[8][i] = QrRegion.format;
+      if (i != 6) map[i][8] = QrRegion.format;
     }
-    map[8][7] = QrRegion.format;
-    map[8][8] = QrRegion.format;
-    for (int i = size - 1; i >= size - 7; i--) {
-      map[i][8] = QrRegion.format;
+    for (int i = 0; i < 8; i++) {
+      map[8][size - 1 - i] = QrRegion.format;
+      map[size - 1 - i][8] = QrRegion.format;
     }
   }
 

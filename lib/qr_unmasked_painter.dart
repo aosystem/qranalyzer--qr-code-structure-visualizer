@@ -10,21 +10,27 @@ class QrUnmaskedPainter extends CustomPainter {
   final int dataBitLimit;
 
   QrUnmaskedPainter(
-      this.matrix,
-      this.regionMap,
-      this.bitOrder,
-      this.highlightIndex,
-      this.dataBitLimit,
-      );
+    this.matrix,
+    this.regionMap,
+    this.bitOrder,
+    this.highlightIndex,
+    this.dataBitLimit,
+  );
 
   @override
   void paint(Canvas canvas, Size size) {
     final int n = matrix.length;
     final double cell = size.width / n;
 
-    final Paint paintNull = Paint()..color = Colors.grey.withValues(alpha: 0.3);
     final Paint paintDark = Paint()..color = Colors.black.withValues(alpha: 0.8);
     final Paint paintLight = Paint()..color = Colors.white.withValues(alpha: 0.8);
+
+    final Paint paintFinder = Paint()..color = Colors.green.withValues(alpha: 0.4);
+    final Paint paintTiming = Paint()..color = Colors.orange.withValues(alpha: 0.4);
+    final Paint paintAlignment = Paint()..color = Colors.purple.withValues(alpha: 0.4);
+    final Paint paintVersionFormat = Paint()..color = Colors.teal.withValues(alpha: 0.4);
+
+    final Paint paintUnused = Paint()..color = Colors.grey.withValues(alpha: 0.2);
 
     final Paint paintDataHighlight = Paint()..color = Colors.blue;
     final Paint paintEccHighlight = Paint()..color = Colors.red;
@@ -35,10 +41,31 @@ class QrUnmaskedPainter extends CustomPainter {
       for (int x = 0; x < n; x++) {
         final region = regionMap[y][x];
         final rect = Rect.fromLTWH(x * cell, y * cell, cell, cell);
+
         if (region == QrRegion.data || region == QrRegion.ecc) {
           canvas.drawRect(rect, matrix[y][x] ? paintDark : paintLight);
         } else {
-          canvas.drawRect(rect, paintNull);
+          Paint p;
+          switch (region) {
+            case QrRegion.finder:
+              p = paintFinder;
+              break;
+            case QrRegion.timing:
+              p = paintTiming;
+              break;
+            case QrRegion.alignment:
+              p = paintAlignment;
+              break;
+            case QrRegion.version:
+            case QrRegion.format:
+              p = paintVersionFormat;
+              break;
+            case QrRegion.unused:
+            default:
+              p = paintUnused;
+              break;
+          }
+          canvas.drawRect(rect, p);
         }
       }
     }
@@ -49,18 +76,19 @@ class QrUnmaskedPainter extends CustomPainter {
 
       bool isData = i < dataBitLimit;
 
-      Paint paint;
+      Paint highlightPaint;
       if (i == highlightIndex) {
-        paint = isData ? paintDataHighlight : paintEccHighlight;
+        highlightPaint = isData ? paintDataHighlight : paintEccHighlight;
       } else {
-        paint = isData ? paintDataPassed : paintEccPassed;
+        highlightPaint = isData ? paintDataPassed : paintEccPassed;
       }
-
-      canvas.drawRect(rect, paint);
+      canvas.drawRect(rect, highlightPaint);
     }
   }
 
   @override
   bool shouldRepaint(covariant QrUnmaskedPainter oldDelegate) =>
-      oldDelegate.highlightIndex != highlightIndex || oldDelegate.dataBitLimit != dataBitLimit;
+    oldDelegate.highlightIndex != highlightIndex ||
+    oldDelegate.dataBitLimit != dataBitLimit ||
+    oldDelegate.matrix != matrix;
 }
